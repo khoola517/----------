@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>نظام نسيج لإدارة الخياطة الراقية | Naseej Atelier System</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Google Fonts: Cairo & Playfair Display / Amiri for luxury feeling -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&amp;family=Cairo:wght@300;400;500;600;700;800;900&amp;family=Playfair+Display:ital,wght@0,600;1,600&amp;display=swap" rel="stylesheet"/>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<!-- Canvas Confetti -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#3B2722',       // بني داكن ملكي فاخر
+              darker: '#281A16',
+              cream: '#F7F1E8',      // كريمي ناعم أنيق
+              creamLight: '#FCFAF6',
+              beige: '#D8C7B5',      // بيج دافئ متناسق
+              gold: '#B99A63',       // ذهبي شامبانيا فاخر
+              goldLight: '#D4BB88',
+              goldSoft: '#F6EEDB',
+              rose: '#C58C85',
+              success: '#4A7C59',
+              warning: '#C67D38',
+              danger: '#A43A3A'
+            }
+          },
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif'],
+            amiri: ['Amiri', 'serif'],
+            serifLuxury: ['Playfair Display', 'serif']
+          },
+          boxShadow: {
+            'luxury': '0 10px 30px -5px rgba(59, 39, 34, 0.05), 0 4px 6px -2px rgba(59, 39, 34, 0.02)',
+            'luxury-lg': '0 20px 40px -10px rgba(59, 39, 34, 0.08), 0 8px 16px -4px rgba(59, 39, 34, 0.04)',
+            'gold-glow': '0 0 25px rgba(185, 154, 99, 0.28)'
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #F7F1E8;
+      color: #3B2722;
+      overflow-x: hidden;
+    }
+    
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F7F1E8;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D8C7B5;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #B99A63;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(216, 199, 181, 0.45);
+    }
+    
+    .gold-gradient-btn {
+      background: linear-gradient(135deg, #B99A63 0%, #D4BB88 50%, #A38249 100%);
+      transition: all 0.3s ease;
+    }
+    .gold-gradient-btn:hover {
+      box-shadow: 0 6px 20px rgba(185, 154, 99, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .gold-border {
+      border: 1px solid #B99A63;
+    }
+
+    @keyframes pulseSoft {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.02); }
+    }
+    .animate-pulse-soft {
+      animation: pulseSoft 3s ease-in-out infinite;
+    }
+    
+    /* Print Styles */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #print-area, #print-area * {
+        visibility: visible;
+      }
+      #print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-brand-cream min-h-screen text-brand-dark flex flex-col antialiased selection:bg-brand-gold selection:text-white">
+<!-- ==================== TOP NAVIGATION BAR ==================== -->
+<header class="bg-white/95 backdrop-blur-md border-b border-brand-beige/50 sticky top-0 z-40 px-6 py-3.5 shadow-sm transition-all">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<!-- Brand & Logo -->
+<div class="flex items-center space-x-4 space-x-reverse">
+<div class="flex items-center gap-3 cursor-pointer" onclick="switchView('dashboard')">
+<div class="w-11 h-11 rounded-full bg-brand-dark flex items-center justify-center text-brand-gold shadow-md border-2 border-brand-gold/60">
+<i class="w-5 h-5" data-lucide="scissors"></i>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-2xl font-bold tracking-tight font-amiri text-brand-dark">نَسِيج</span>
+<span class="text-xs px-2 py-0.5 rounded-full bg-brand-gold/15 text-brand-gold font-medium border border-brand-gold/30">أتيليه راقٍ</span>
+</div>
+<p class="text-[11px] text-brand-dark/60 tracking-wider">NASEEJ HAUTE COUTURE ATELIER</p>
+</div>
+</div>
+<!-- Mode Switcher Pill (Admin vs Client Tracker) -->
+<div class="hidden md:flex bg-brand-cream/80 p-1 rounded-xl border border-brand-beige/60 text-xs font-semibold mr-6">
+<button class="px-4 py-1.5 rounded-lg transition-all flex items-center gap-2 bg-brand-dark text-white shadow-sm" id="nav-btn-admin" onclick="switchView('dashboard')">
+<i class="w-3.5 h-3.5" data-lucide="layout-dashboard"></i>
+            لوحة الإدارة والموظفات
+          </button>
+<button class="px-4 py-1.5 rounded-lg transition-all flex items-center gap-2 text-brand-dark/70 hover:text-brand-dark" id="nav-btn-client" onclick="switchView('tracker')">
+<i class="w-3.5 h-3.5 text-brand-gold" data-lucide="sparkles"></i>
+            بوابة تتبع العميلات الفاخرة
+          </button>
+</div>
+</div>
+<!-- Quick Actions, User Profile & Roles -->
+<div class="flex items-center gap-3">
+<!-- New Order Quick Button -->
+<button class="gold-gradient-btn text-white px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm" onclick="openModal('newOrderModal')">
+<i class="w-4 h-4" data-lucide="plus"></i>
+<span>طلب تفصيل جديد</span>
+</button>
+<!-- Role Selector Switch -->
+<div class="relative">
+<select class="text-xs bg-brand-creamLight border border-brand-beige rounded-xl px-2.5 py-1.5 font-medium text-brand-dark focus:outline-none focus:ring-1 focus:ring-brand-gold cursor-pointer" id="roleSelector" onchange="changeRole(this.value)">
+<option value="admin">صلاحية: المديرة العامة (Admin)</option>
+<option value="manager">صلاحية: مشرفة الورشة (Manager)</option>
+<option value="tailor">صلاحية: كبار الخياطات (Senior Tailor)</option>
+</select>
+</div>
+<!-- Avatar & Store Status -->
+<div class="flex items-center gap-2.5 pr-2 border-r border-brand-beige/60">
+<div class="w-9 h-9 rounded-full bg-brand-goldSoft border border-brand-gold flex items-center justify-center text-brand-gold font-bold text-sm">
+            ن.ع
+          </div>
+<div class="hidden lg:block text-right">
+<p class="text-xs font-bold text-brand-dark">نورة العبدلي</p>
+<p class="text-[10px] text-brand-success flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-brand-success inline-block"></span>
+              الورشة تعمل الآن
+            </p>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+<div class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8">
+<!-- ============================================================== -->
+<!-- VIEW 1: CLIENT PUBLIC PORTAL & LIVE ORDER TRACKER               -->
+<!-- ============================================================== -->
+<div class="hidden space-y-8 animate-fadeIn" id="view-client-tracker">
+<!-- Luxury Hero Banner for Client -->
+<div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-dark via-[#48302A] to-brand-dark text-white p-8 md:p-12 shadow-luxury-lg border border-brand-gold/30">
+<!-- Decorative golden motif background -->
+<div class="absolute -left-12 -bottom-12 w-64 h-64 rounded-full border border-brand-gold/15 pointer-events-none"></div>
+<div class="absolute -right-8 -top-8 w-80 h-80 rounded-full border border-brand-gold/10 pointer-events-none"></div>
+<div class="relative z-10 max-w-3xl">
+<div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-gold/20 border border-brand-gold/40 text-brand-goldLight text-xs font-semibold mb-4">
+<i class="w-3.5 h-3.5" data-lucide="crown"></i>
+            تجربة كوتور استثنائية مصممة خصيصاً لكِ
+          </div>
+<h1 class="text-3xl md:text-5xl font-bold font-amiri tracking-tight mb-3">
+            مرحباً بكِ في عالم <span class="text-brand-gold font-serifLuxury italic">نَسِيج</span> للجمال والذوق
+          </h1>
+<p class="text-brand-cream/80 text-sm md:text-base leading-relaxed mb-6 font-light">
+            تابعي أدق مراحل نسج وخياطة قطعتكِ الفاخرة لحظة بلحظة بحرفية تليق بإطلالتكِ الملكية.
+          </p>
+<!-- Search Order Form -->
+<div class="bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20 flex flex-col sm:flex-row items-center gap-2 max-w-xl">
+<div class="flex-1 flex items-center gap-2 px-3 w-full">
+<i class="w-4 h-4 text-brand-gold" data-lucide="search"></i>
+<input class="w-full bg-transparent text-white placeholder-white/50 text-xs md:text-sm focus:outline-none" id="clientSearchInput" placeholder="أدخلي رقم الطلب (مثال: NSJ-2024-884) أو رقم الجوال..." type="text" value="NSJ-2024-884"/>
+</div>
+<button class="gold-gradient-btn text-white text-xs md:text-sm font-bold px-6 py-2.5 rounded-xl w-full sm:w-auto shadow-md" onclick="handleClientSearch()">
+              تتبّع الآن
+            </button>
+</div>
+</div>
+</div>
+<!-- Live Order Detailed View (Loaded from mock or search) -->
+<div class="space-y-6" id="trackedOrderCard">
+<!-- Dynamic Motivation Banner & Countdown Card -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Motivational Banner -->
+<div class="lg:col-span-2 glass-card rounded-3xl p-6 md:p-8 shadow-luxury border-r-4 border-r-brand-gold flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-start justify-between">
+<div>
+<span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300" id="trackerOrderStatusBadge">
+                  قيد الخياطة والاهتمام بالتفاصيل
+                </span>
+<h2 class="text-2xl font-bold font-amiri text-brand-dark mt-3" id="trackerClientNameTitle">
+                  عزيزتنا: سارة بنت فهد آل سعود ✨
+                </h2>
+<p class="text-brand-dark/70 text-sm mt-2 leading-relaxed font-normal" id="trackerDynamicQuote">
+                  "فريقنا من أمهر مصممي الخياطة الراقية يقوم الآن بحياكة الدانتيل الفرنسي وتثبيت التطريز اليدوي بعناية فائقة لتكوني أيقونة الحفل."
+                </p>
+</div>
+<div class="w-14 h-14 rounded-2xl bg-brand-goldSoft border border-brand-gold/40 flex items-center justify-center text-brand-gold shrink-0">
+<i class="w-7 h-7" data-lucide="sparkles"></i>
+</div>
+</div>
+<!-- Quick Details Pill -->
+<div class="mt-6 pt-5 border-t border-brand-beige/50 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+<div>
+<span class="text-brand-dark/50 block text-[11px]">رقم الطلب:</span>
+<span class="font-bold text-brand-dark font-mono text-sm" id="trackerOrderIdDisplay">NSJ-2024-884</span>
+</div>
+<div>
+<span class="text-brand-dark/50 block text-[11px]">نوع القطعة:</span>
+<span class="font-bold text-brand-dark" id="trackerItemType">فستان سهرة ملكي كوتور</span>
+</div>
+<div>
+<span class="text-brand-dark/50 block text-[11px]">موعد التسليم المقرر:</span>
+<span class="font-bold text-brand-gold font-mono" id="trackerDeliveryDateDisplay">28 أكتوبر 2024 - 07:00 م</span>
+</div>
+<div>
+<span class="text-brand-dark/50 block text-[11px]">المسؤولة المباشرة:</span>
+<span class="font-bold text-brand-dark" id="trackerTailorDisplay">م. إلينا (كبير الخياطات)</span>
+</div>
+</div>
+</div>
+<!-- SMART REAL-TIME COUNTDOWN TIMER -->
+<div class="glass-card rounded-3xl p-6 md:p-8 shadow-luxury flex flex-col justify-center items-center text-center bg-gradient-to-b from-white to-brand-creamLight border border-brand-gold/40">
+<div class="flex items-center gap-1.5 text-xs text-brand-gold font-bold tracking-wider mb-2">
+<i class="w-4 h-4 animate-spin" data-lucide="clock" style="animation-duration: 12s;"></i>
+              الوقت التنازلي لموعد الاستلام
+            </div>
+<!-- Countdown Digits Grid -->
+<div class="grid grid-cols-4 gap-2 w-full my-4">
+<div class="bg-brand-dark text-white rounded-2xl p-2.5 shadow-sm border border-brand-gold/40">
+<span class="text-2xl font-bold font-mono text-brand-goldLight block" id="timerDays">02</span>
+<span class="text-[10px] text-white/70 block mt-0.5">يوم</span>
+</div>
+<div class="bg-brand-dark text-white rounded-2xl p-2.5 shadow-sm border border-brand-gold/40">
+<span class="text-2xl font-bold font-mono text-brand-goldLight block" id="timerHours">14</span>
+<span class="text-[10px] text-white/70 block mt-0.5">ساعة</span>
+</div>
+<div class="bg-brand-dark text-white rounded-2xl p-2.5 shadow-sm border border-brand-gold/40">
+<span class="text-2xl font-bold font-mono text-brand-goldLight block" id="timerMinutes">38</span>
+<span class="text-[10px] text-white/70 block mt-0.5">دقيقة</span>
+</div>
+<div class="bg-brand-dark text-white rounded-2xl p-2.5 shadow-sm border border-brand-gold/40">
+<span class="text-2xl font-bold font-mono text-brand-gold block" id="timerSeconds">45</span>
+<span class="text-[10px] text-brand-gold block mt-0.5">ثانية</span>
+</div>
+</div>
+<div class="text-xs text-brand-dark/70 bg-brand-goldSoft/60 py-1.5 px-3 rounded-xl border border-brand-gold/20 w-full">
+              ✨ التجهيز يسير وفق الخطة الزمنية المعتمدة
+            </div>
+</div>
+</div>
+<!-- VISUAL WORKFLOW TIMELINE -->
+<div class="glass-card rounded-3xl p-6 md:p-8 shadow-luxury">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h3 class="text-lg font-bold font-amiri text-brand-dark flex items-center gap-2">
+<i class="w-5 h-5 text-brand-gold" data-lucide="milestone"></i>
+                مسار حياكة القطعة (Live Timeline)
+              </h3>
+<p class="text-xs text-brand-dark/60 mt-0.5">خطوات التنفيذ الفعلية موثقة ومعتمدة من مشرفة الورشة</p>
+</div>
+<span class="text-xs bg-brand-goldSoft text-brand-dark font-medium px-3 py-1 rounded-full border border-brand-gold/30">
+              المرحلة 3 من 5
+            </span>
+</div>
+<!-- Timeline Steps -->
+<div class="relative">
+<!-- Connecting Line -->
+<div class="hidden md:block absolute top-6 right-8 left-8 h-1 bg-brand-beige/50 -z-0">
+<div class="h-full bg-brand-gold transition-all duration-700" id="trackerProgressLine" style="width: 58%;"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-5 gap-6 relative z-10">
+<!-- Step 1: المقاسات -->
+<div class="flex md:flex-col items-center md:text-center gap-3">
+<div class="w-12 h-12 rounded-full bg-brand-dark text-brand-gold flex items-center justify-center font-bold text-sm shadow-md border-2 border-brand-gold shrink-0">
+<i class="w-5 h-5" data-lucide="check"></i>
+</div>
+<div>
+<h4 class="text-xs font-bold text-brand-dark">1. اعتماد المقاسات</h4>
+<p class="text-[11px] text-brand-dark/60">تم التأكيد في الأتيليه</p>
+<span class="text-[10px] text-brand-success font-semibold">مكتمل ✓</span>
+</div>
+</div>
+<!-- Step 2: القص والتفصيل -->
+<div class="flex md:flex-col items-center md:text-center gap-3">
+<div class="w-12 h-12 rounded-full bg-brand-dark text-brand-gold flex items-center justify-center font-bold text-sm shadow-md border-2 border-brand-gold shrink-0">
+<i class="w-5 h-5" data-lucide="check"></i>
+</div>
+<div>
+<h4 class="text-xs font-bold text-brand-dark">2. باترون وقص القماش</h4>
+<p class="text-[11px] text-brand-dark/60">حرير ميكادو إيطالي</p>
+<span class="text-[10px] text-brand-success font-semibold">مكتمل ✓</span>
+</div>
+</div>
+<!-- Step 3: الخياطة (Active) -->
+<div class="flex md:flex-col items-center md:text-center gap-3">
+<div class="w-12 h-12 rounded-full bg-brand-gold text-white flex items-center justify-center font-bold text-sm shadow-gold-glow border-4 border-white shrink-0 animate-pulse-soft">
+<i class="w-5 h-5" data-lucide="scissors"></i>
+</div>
+<div>
+<h4 class="text-xs font-bold text-brand-gold">3. قيد الخياطة والتجميع</h4>
+<p class="text-[11px] text-brand-dark/70 font-medium">حياكة وتطريز يدوي</p>
+<span class="text-[10px] text-brand-gold font-bold">المرحلة الحالية ⚙️</span>
+</div>
+</div>
+<!-- Step 4: الكي والتشطيب -->
+<div class="flex md:flex-col items-center md:text-center gap-3 opacity-60">
+<div class="w-12 h-12 rounded-full bg-white text-brand-dark/40 flex items-center justify-center font-bold text-sm border-2 border-brand-beige shrink-0">
+<i class="w-5 h-5" data-lucide="sparkle"></i>
+</div>
+<div>
+<h4 class="text-xs font-bold text-brand-dark">4. التشطيب والبروفة</h4>
+<p class="text-[11px] text-brand-dark/50">الفحص والكي البخاري</p>
+<span class="text-[10px] text-brand-dark/40">قريباً</span>
+</div>
+</div>
+<!-- Step 5: الجاهزية والتسليم -->
+<div class="flex md:flex-col items-center md:text-center gap-3 opacity-60">
+<div class="w-12 h-12 rounded-full bg-white text-brand-dark/40 flex items-center justify-center font-bold text-sm border-2 border-brand-beige shrink-0">
+<i class="w-5 h-5" data-lucide="package-check"></i>
+</div>
+<div>
+<h4 class="text-xs font-bold text-brand-dark">5. جاهز للاستلام والتألق</h4>
+<p class="text-[11px] text-brand-dark/50">في صالة العرض</p>
+<span class="text-[10px] text-brand-dark/40">المرحلة الأخيرة</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SPECIFICATIONS, FABRICS & MEASUREMENTS VAULT -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Piece Visual & Fabric Spec -->
+<div class="glass-card rounded-3xl p-6 shadow-luxury">
+<h4 class="text-sm font-bold font-amiri text-brand-dark mb-4 flex items-center gap-2">
+<i class="w-4 h-4 text-brand-gold" data-lucide="image"></i>
+              موديل القطعة والقماش المعتمد
+            </h4>
+<div class="rounded-2xl overflow-hidden relative border border-brand-beige/60 bg-brand-dark/5 h-56 flex items-center justify-center group">
+<!-- Dress mockup drawing / photo -->
+<img alt="موديل الفستان" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-brand-dark/80 via-transparent to-transparent flex items-end p-4 text-white">
+<div>
+<p class="text-xs font-bold">فستان سهرة كوتور - لون كحلي ملكي</p>
+<p class="text-[10px] text-white/80">قماش ميكادو فاخر + تطريز سواروفسكي خفيف</p>
+</div>
+</div>
+</div>
+<div class="mt-4 space-y-2 text-xs">
+<div class="flex justify-between py-1.5 border-b border-brand-beige/30">
+<span class="text-brand-dark/60">القماش الأساسي:</span>
+<span class="font-bold text-brand-dark">حرير ميكادو إيطالي 100%</span>
+</div>
+<div class="flex justify-between py-1.5 border-b border-brand-beige/30">
+<span class="text-brand-dark/60">البطانة:</span>
+<span class="font-bold text-brand-dark">حرير ستان طبيعي بارد</span>
+</div>
+<div class="flex justify-between py-1.5">
+<span class="text-brand-dark/60">طول الذيل الخلفي:</span>
+<span class="font-bold text-brand-dark">35 سم مدرج</span>
+</div>
+</div>
+</div>
+<!-- Recorded Measurements (خزينة المقاسات المعتمدة) -->
+<div class="glass-card rounded-3xl p-6 shadow-luxury">
+<div class="flex items-center justify-between mb-4">
+<h4 class="text-sm font-bold font-amiri text-brand-dark flex items-center gap-2">
+<i class="w-4 h-4 text-brand-gold" data-lucide="ruler"></i>
+                المقاسات المعتمدة للقطعة (بالسنتيمتر)
+              </h4>
+<span class="text-[10px] bg-green-50 text-brand-success font-semibold px-2 py-0.5 rounded-md border border-green-200">
+                موثقة
+              </span>
+</div>
+<div class="grid grid-cols-2 gap-2 text-xs">
+<div class="p-2.5 rounded-xl bg-brand-creamLight border border-brand-beige/40">
+<span class="text-[10px] text-brand-dark/60 block">الطول الكامل</span>
+<span class="font-bold text-sm text-brand-dark font-mono">152 cm</span>
+</div>
+<div class="p-2.5 rounded-xl bg-brand-creamLight border border-brand-beige/40">
+<span class="text-[10px] text-brand-dark/60 block">محيط الصدر</span>
+<span class="font-bold text-sm text-brand-dark font-mono">94 cm</span>
+</div>
+<div class="p-2.5 rounded-xl bg-brand-creamLight border border-brand-beige/40">
+<span class="text-[10px] text-brand-dark/60 block">محيط الخصر</span>
+<span class="font-bold text-sm text-brand-dark font-mono">72 cm</span>
+</div>
+<div class="p-2.5 rounded-xl bg-brand-creamLight border border-brand-beige/40">
+<span class="text-[10px] text-brand-dark/60 block">محيط الأرداف</span>
+<span class="font-bold text-sm text-brand-dark font-mono">102 cm</span>
+</div>
+<div class="p-2.5 rounded-xl bg-brand-creamLight border border-brand-beige/40">
+<span class="text-[10px] text-brand-dark/60 block">عرض الكتف</span>
+<span class="font-bold text-sm text-brand-dark font-mono">39 cm</span>
+</div>
+<div class="p-2.5 rounded-xl bg-brand-creamLight border border-brand-beige/40">
+<span class="text-[10px] text-brand-dark/60 block">طول الكم</span>
+<span class="font-bold text-sm text-brand-dark font-mono">59 cm</span>
+</div>
+</div>
+<div class="mt-4 p-3 bg-brand-goldSoft/40 rounded-xl border border-brand-gold/30 text-[11px] text-brand-dark/70">
+              📌 ملاحظة التفصيل: تمت إضافة راحة 1.5 سم في محيط الصدر والخصر لضمان انسيابية الحركة أثناء المناسبة.
+            </div>
+</div>
+<!-- Financials Summary & Direct Actions -->
+<div class="glass-card rounded-3xl p-6 shadow-luxury flex flex-col justify-between">
+<div>
+<h4 class="text-sm font-bold font-amiri text-brand-dark mb-4 flex items-center gap-2">
+<i class="w-4 h-4 text-brand-gold" data-lucide="receipt"></i>
+                الحساب المالي والخدمات
+              </h4>
+<div class="space-y-3 text-xs mb-6">
+<div class="flex justify-between py-2 border-b border-brand-beige/30">
+<span class="text-brand-dark/70">إجمالي قيمة التفصيل:</span>
+<span class="font-bold text-brand-dark font-mono">3,850 ر.س</span>
+</div>
+<div class="flex justify-between py-2 border-b border-brand-beige/30">
+<span class="text-brand-dark/70">العربون المدفوع (مقدم):</span>
+<span class="font-bold text-brand-success font-mono">2,000 ر.س (مدفوع ✓)</span>
+</div>
+<div class="flex justify-between py-2 bg-brand-cream rounded-xl px-3 font-semibold">
+<span class="text-brand-dark">المتبقي عند الاستلام:</span>
+<span class="font-bold text-brand-gold font-mono text-sm">1,850 ر.س</span>
+</div>
+</div>
+</div>
+<div class="space-y-2.5">
+<!-- WhatsApp Atelier Contact -->
+<a class="w-full bg-[#25D366] hover:bg-[#1EBE5D] text-white py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all" href="https://wa.me/966500000000?text=مرحباً%20مشغل%20نسيج،%20أستفسر%20عن%20طلبي%20رقم%20NSJ-2024-884" target="_blank">
+<i class="w-4 h-4" data-lucide="message-circle"></i>
+                محادثة مباشرة مع مشرفة الأتيليه عبر واتساب
+              </a>
+<!-- Print / PDF Order Summary -->
+<button class="w-full bg-white hover:bg-brand-cream border border-brand-beige text-brand-dark py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all" onclick="printOrderSummary()">
+<i class="w-4 h-4 text-brand-gold" data-lucide="printer"></i>
+                طباعة / حفظ بطاقة الطلب كـ PDF
+              </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ============================================================== -->
+<!-- VIEW 2: INTERNAL ADMIN DASHBOARD (WMS)                          -->
+<!-- ============================================================== -->
+<div class="space-y-8 animate-fadeIn" id="view-admin-dashboard">
+<!-- Admin Top Metrics / Stats Cards -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+<!-- Total Orders -->
+<div class="glass-card p-4 rounded-2xl shadow-luxury hover:border-brand-gold/50 transition-all cursor-pointer" onclick="filterOrdersByStatus('all')">
+<div class="flex items-center justify-between text-xs text-brand-dark/60 mb-2">
+<span>إجمالي الطلبات</span>
+<div class="p-1.5 rounded-lg bg-brand-cream text-brand-dark">
+<i class="w-3.5 h-3.5" data-lucide="shopping-bag"></i>
+</div>
+</div>
+<p class="text-2xl font-bold font-mono text-brand-dark" id="statTotalOrders">48</p>
+<span class="text-[10px] text-brand-success font-medium flex items-center gap-0.5 mt-1">
+            +14% هذا الشهر
+          </span>
+</div>
+<!-- In Progress -->
+<div class="glass-card p-4 rounded-2xl shadow-luxury hover:border-brand-gold/50 transition-all cursor-pointer" onclick="filterOrdersByStatus('in_progress')">
+<div class="flex items-center justify-between text-xs text-brand-dark/60 mb-2">
+<span>قيد الخياطة</span>
+<div class="p-1.5 rounded-lg bg-amber-50 text-amber-600">
+<i class="w-3.5 h-3.5" data-lucide="scissors"></i>
+</div>
+</div>
+<p class="text-2xl font-bold font-mono text-amber-700" id="statInProgress">19</p>
+<span class="text-[10px] text-brand-dark/50 mt-1 block">توزيع على 4 خياطات</span>
+</div>
+<!-- Ready For Delivery -->
+<div class="glass-card p-4 rounded-2xl shadow-luxury hover:border-brand-gold/50 transition-all cursor-pointer" onclick="filterOrdersByStatus('ready')">
+<div class="flex items-center justify-between text-xs text-brand-dark/60 mb-2">
+<span>جاهزة للتسليم</span>
+<div class="p-1.5 rounded-lg bg-green-50 text-brand-success">
+<i class="w-3.5 h-3.5" data-lucide="check-circle"></i>
+</div>
+</div>
+<p class="text-2xl font-bold font-mono text-brand-success" id="statReady">8</p>
+<span class="text-[10px] text-green-700 font-medium mt-1 block">في صالة الاستلام</span>
+</div>
+<!-- Delayed / Urgent -->
+<div class="glass-card p-4 rounded-2xl shadow-luxury hover:border-brand-gold/50 transition-all cursor-pointer" onclick="filterOrdersByStatus('urgent')">
+<div class="flex items-center justify-between text-xs text-brand-dark/60 mb-2">
+<span>طلبات مستعجلة</span>
+<div class="p-1.5 rounded-lg bg-red-50 text-brand-danger">
+<i class="w-3.5 h-3.5" data-lucide="alert-triangle"></i>
+</div>
+</div>
+<p class="text-2xl font-bold font-mono text-brand-danger" id="statUrgent">3</p>
+<span class="text-[10px] text-red-600 font-medium mt-1 block">خلال 48 ساعة</span>
+</div>
+<!-- Monthly Sales -->
+<div class="glass-card p-4 rounded-2xl shadow-luxury">
+<div class="flex items-center justify-between text-xs text-brand-dark/60 mb-2">
+<span>مبيعات الشهر</span>
+<div class="p-1.5 rounded-lg bg-brand-goldSoft text-brand-gold">
+<i class="w-3.5 h-3.5" data-lucide="coins"></i>
+</div>
+</div>
+<p class="text-xl font-bold font-mono text-brand-dark" id="statSales">118,400</p>
+<span class="text-[10px] text-brand-dark/60 mt-1 block">ريال سعودي</span>
+</div>
+<!-- Pending Receivables -->
+<div class="glass-card p-4 rounded-2xl shadow-luxury">
+<div class="flex items-center justify-between text-xs text-brand-dark/60 mb-2">
+<span>المتبقيات عند الاستلام</span>
+<div class="p-1.5 rounded-lg bg-brand-cream text-brand-gold">
+<i class="w-3.5 h-3.5" data-lucide="clock"></i>
+</div>
+</div>
+<p class="text-xl font-bold font-mono text-brand-gold" id="statPendingPayments">34,250</p>
+<span class="text-[10px] text-brand-dark/60 mt-1 block">ريال معلق</span>
+</div>
+</div>
+<!-- Navigation Tabs inside Dashboard (Orders, Measurements Vault, Inventory, Staff & Calendar) -->
+<div class="flex flex-wrap items-center justify-between gap-4 border-b border-brand-beige/50 pb-3">
+<div class="flex items-center gap-2 overflow-x-auto">
+<button class="px-4 py-2 rounded-xl text-xs font-bold transition-all bg-brand-dark text-white shadow-sm flex items-center gap-2" id="adminTabOrders" onclick="switchAdminSubTab('orders')">
+<i class="w-4 h-4" data-lucide="list-ordered"></i>
+            إدارة الطلبات والإنتاج
+          </button>
+<button class="px-4 py-2 rounded-xl text-xs font-bold transition-all bg-white text-brand-dark hover:bg-brand-cream border border-brand-beige/60 flex items-center gap-2" id="adminTabVault" onclick="switchAdminSubTab('vault')">
+<i class="w-4 h-4 text-brand-gold" data-lucide="ruler"></i>
+            خزينة المقاسات الإلكترونية
+          </button>
+<button class="px-4 py-2 rounded-xl text-xs font-bold transition-all bg-white text-brand-dark hover:bg-brand-cream border border-brand-beige/60 flex items-center gap-2" id="adminTabInventory" onclick="switchAdminSubTab('inventory')">
+<i class="w-4 h-4 text-brand-gold" data-lucide="package"></i>
+            مخزون الأقمشة والخيوط
+          </button>
+<button class="px-4 py-2 rounded-xl text-xs font-bold transition-all bg-white text-brand-dark hover:bg-brand-cream border border-brand-beige/60 flex items-center gap-2" id="adminTabStaff" onclick="switchAdminSubTab('staff')">
+<i class="w-4 h-4 text-brand-gold" data-lucide="calendar"></i>
+            كادر الخياطات والمواعيد
+          </button>
+</div>
+<div class="flex items-center gap-2">
+<button class="gold-gradient-btn text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm" onclick="openModal('newOrderModal')">
+<i class="w-4 h-4" data-lucide="plus-circle"></i>
+            إضافة طلب تفصيل
+          </button>
+</div>
+</div>
+<!-- ==================== SUB-TAB 1: ORDERS MANAGEMENT ==================== -->
+<div class="space-y-6" id="subtab-orders">
+<!-- Search & Filter Controls -->
+<div class="glass-card p-4 rounded-2xl shadow-luxury flex flex-col md:flex-row items-center justify-between gap-4">
+<div class="relative w-full md:w-96">
+<i class="w-4 h-4 text-brand-dark/40 absolute top-3 right-3" data-lucide="search"></i>
+<input class="w-full bg-brand-creamLight text-xs py-2 pr-9 pl-4 rounded-xl border border-brand-beige focus:outline-none focus:ring-1 focus:ring-brand-gold" id="ordersTableSearch" oninput="renderOrdersTable()" placeholder="البحث برقم الطلب، اسم العميلة، أو رقم الهاتف..." type="text"/>
+</div>
+<div class="flex items-center gap-3 w-full md:w-auto">
+<select class="bg-brand-creamLight text-xs py-2 px-3 rounded-xl border border-brand-beige focus:outline-none focus:ring-1 focus:ring-brand-gold text-brand-dark" id="ordersStatusFilter" onchange="renderOrdersTable()">
+<option value="all">كل الحالات</option>
+<option value="new">تم أخذ المقاسات</option>
+<option value="cutting">تم القص والباترون</option>
+<option value="in_progress">قيد الخياطة</option>
+<option value="finishing">التشطيب والكي</option>
+<option value="ready">جاهز للتسليم</option>
+<option value="delivered">تم التسليم</option>
+</select>
+<button class="bg-white hover:bg-brand-cream text-brand-dark text-xs py-2 px-3 rounded-xl border border-brand-beige flex items-center gap-1.5 transition-all" onclick="exportOrdersCSV()">
+<i class="w-3.5 h-3.5 text-brand-gold" data-lucide="download"></i>
+              تصدير إكسل
+            </button>
+</div>
+</div>
+<!-- Orders Table -->
+<div class="glass-card rounded-2xl shadow-luxury overflow-hidden border border-brand-beige/50">
+<div class="overflow-x-auto">
+<table class="w-full text-right text-xs">
+<thead class="bg-brand-dark text-white font-amiri text-sm">
+<tr>
+<th class="py-3.5 px-4 font-semibold">رقم الطلب</th>
+<th class="py-3.5 px-4 font-semibold">العميلة</th>
+<th class="py-3.5 px-4 font-semibold">نوع القطعة والقماش</th>
+<th class="py-3.5 px-4 font-semibold">تاريخ وموعد التسليم</th>
+<th class="py-3.5 px-4 font-semibold">الخياطة المسؤولة</th>
+<th class="py-3.5 px-4 font-semibold">الحالة الحالية</th>
+<th class="py-3.5 px-4 font-semibold">المالية</th>
+<th class="py-3.5 px-4 font-semibold text-center">الإجراءات</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-brand-beige/40" id="ordersTableBody">
+<!-- Dynamically populated via JS -->
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- ==================== SUB-TAB 2: MEASUREMENTS VAULT ==================== -->
+<div class="hidden space-y-6" id="subtab-vault">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="text-xl font-bold font-amiri text-brand-dark">خزينة المقاسات الإلكترونية المعتمدة</h3>
+<p class="text-xs text-brand-dark/60">سجل إلكتروني دقيق وتاريخي لقياسات كافة العميلات لتسهيل تفصيل الطلبات المستقبلية</p>
+</div>
+<button class="gold-gradient-btn text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2" onclick="openModal('newClientVaultModal')">
+<i class="w-4 h-4" data-lucide="user-plus"></i>
+            تسجيل عميلة ومقاسات جديدة
+          </button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="measurementsVaultCards">
+<!-- Dynamically populated -->
+</div>
+</div>
+<!-- ==================== SUB-TAB 3: INVENTORY MANAGEMENT ==================== -->
+<div class="hidden space-y-6" id="subtab-inventory">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="text-xl font-bold font-amiri text-brand-dark">مخزون الأقمشة والخيوط ومستلزمات الكوتور</h3>
+<p class="text-xs text-brand-dark/60">متابعة دقيقة للأمتار المتوفرة، ألوان الخيوط، وتنبيهات النقص الفوري</p>
+</div>
+<button class="gold-gradient-btn text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2" onclick="openModal('newInventoryModal')">
+<i class="w-4 h-4" data-lucide="plus"></i>
+            إضافة مادة للمخزون
+          </button>
+</div>
+<!-- Inventory Alert Banner if any item low -->
+<div class="p-4 rounded-2xl bg-amber-50 border border-amber-300 flex items-center justify-between text-xs text-amber-900">
+<div class="flex items-center gap-2">
+<i class="w-5 h-5 text-amber-600" data-lucide="alert-triangle"></i>
+<span>تنبيه المخزون: <strong>2 أصناف</strong> وصلت إلى حد إعادة الطلب الأدنى (حرير شيفون بيج، سحاب سحري فرنسي 60سم).</span>
+</div>
+<button class="bg-amber-600 text-white px-3 py-1 rounded-lg font-bold" onclick="toast('تم إرسال إشعار طلب توريد للموردين المعتمدين')">
+            طلب توريد سريع
+          </button>
+</div>
+<!-- Inventory Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="inventoryGrid">
+<!-- Dynamically populated -->
+</div>
+</div>
+<!-- ==================== SUB-TAB 4: STAFF & CALENDAR ==================== -->
+<div class="hidden space-y-6" id="subtab-staff">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Staff Tailors Load -->
+<div class="lg:col-span-1 glass-card p-6 rounded-3xl shadow-luxury space-y-4">
+<h3 class="text-lg font-bold font-amiri text-brand-dark flex items-center gap-2">
+<i class="w-5 h-5 text-brand-gold" data-lucide="users"></i>
+              إنتاجية كادر الخياطات
+            </h3>
+<p class="text-xs text-brand-dark/60">متابعة توزيع القطع وسير الإنجاز اليومي</p>
+<div class="space-y-4 mt-4" id="tailorsList">
+<!-- Dynamically populated -->
+</div>
+</div>
+<!-- Appointments Calendar -->
+<div class="lg:col-span-2 glass-card p-6 rounded-3xl shadow-luxury space-y-4">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="text-lg font-bold font-amiri text-brand-dark flex items-center gap-2">
+<i class="w-5 h-5 text-brand-gold" data-lucide="calendar"></i>
+                  جدول مواعيد القياس والبروفة والتسليم اليومي
+                </h3>
+<p class="text-xs text-brand-dark/60">مواعيد الصالون والأتيليه المجدولة لليوم والأيام القادمة</p>
+</div>
+<button class="text-xs bg-brand-cream hover:bg-brand-beige/50 text-brand-dark font-bold px-3 py-1.5 rounded-xl border border-brand-beige" onclick="toast('تم فتح حجز موعد بروفة جديد')">
+                + موعد بروفة جديد
+              </button>
+</div>
+<div class="space-y-3 mt-4" id="appointmentsList">
+<!-- Dynamically populated -->
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== ORDER DETAILS & STATUS UPDATE MODAL ==================== -->
+<div class="fixed inset-0 bg-brand-dark/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" id="orderDetailsModal">
+<div class="glass-card w-full max-w-2xl rounded-3xl p-6 md:p-8 shadow-2xl border border-brand-gold/40 max-h-[90vh] overflow-y-auto">
+<div class="flex items-center justify-between pb-4 border-b border-brand-beige/50 mb-6">
+<div>
+<span class="text-xs px-2.5 py-0.5 rounded-full bg-brand-goldSoft text-brand-dark font-mono font-bold" id="modalOrderBadge">NSJ-2024-884</span>
+<h3 class="text-2xl font-bold font-amiri text-brand-dark mt-1" id="modalOrderTitle">تفاصيل ومسار طلب التفصيل</h3>
+</div>
+<button class="w-8 h-8 rounded-full bg-brand-cream hover:bg-brand-beige/50 text-brand-dark flex items-center justify-center" onclick="closeModal('orderDetailsModal')">
+<i class="w-4 h-4" data-lucide="x"></i>
+</button>
+</div>
+<div class="space-y-6" id="modalOrderContent">
+<!-- Filled dynamically -->
+</div>
+<!-- Quick Status Changer from Admin to reflect directly to client -->
+<div class="mt-8 pt-6 border-t border-brand-beige/60">
+<label class="block text-xs font-bold text-brand-dark mb-2">تحديث حالة الطلب فورياً (ينعكس مباشرة في بوابة تتبع العميلة ⚡):</label>
+<div class="flex flex-wrap gap-2">
+<button class="text-xs py-1.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium" onclick="updateOrderStatus('new')">1. المقاسات</button>
+<button class="text-xs py-1.5 px-3 rounded-xl bg-blue-100 hover:bg-blue-200 text-blue-900 font-medium" onclick="updateOrderStatus('cutting')">2. القص</button>
+<button class="text-xs py-1.5 px-3 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold border border-amber-300" onclick="updateOrderStatus('in_progress')">3. الخياطة</button>
+<button class="text-xs py-1.5 px-3 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-900 font-medium" onclick="updateOrderStatus('finishing')">4. التشطيب والكي</button>
+<button class="text-xs py-1.5 px-3 rounded-xl bg-green-100 hover:bg-green-200 text-green-900 font-bold border border-green-300" onclick="updateOrderStatus('ready')">5. جاهز للتسليم 👑</button>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== NEW ORDER CREATION MODAL ==================== -->
+<div class="fixed inset-0 bg-brand-dark/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" id="newOrderModal">
+<div class="glass-card w-full max-w-3xl rounded-3xl p-6 md:p-8 shadow-2xl border border-brand-gold/40 max-h-[90vh] overflow-y-auto">
+<div class="flex items-center justify-between pb-4 border-b border-brand-beige/50 mb-6">
+<div>
+<h3 class="text-2xl font-bold font-amiri text-brand-dark">تسجيل طلب تفصيل وخياطة راقية جديد</h3>
+<p class="text-xs text-brand-dark/60">أدخلي بيانات العميلة، مواصفات القماش، المقاسات، والجدول الزمني</p>
+</div>
+<button class="w-8 h-8 rounded-full bg-brand-cream hover:bg-brand-beige/50 text-brand-dark flex items-center justify-center" onclick="closeModal('newOrderModal')">
+<i class="w-4 h-4" data-lucide="x"></i>
+</button>
+</div>
+<form class="space-y-6" id="newOrderForm" onsubmit="handleCreateOrder(event)">
+<!-- Client info -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-xs font-bold text-brand-dark mb-1">اسم العميلة الكريمة *</label>
+<input class="w-full bg-brand-creamLight text-xs p-2.5 rounded-xl border border-brand-beige focus:ring-1 focus:ring-brand-gold outline-none" id="newClientName" placeholder="مثال: منيرة الصالح" required="" type="text"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-brand-dark mb-1">رقم الجوال للتواصل والواتساب *</label>
+<input class="w-full bg-brand-creamLight text-xs p-2.5 rounded-xl border border-brand-beige focus:ring-1 focus:ring-brand-gold outline-none" id="newClientPhone" placeholder="05XXXXXXXX" required="" type="tel"/>
+</div>
+</div>
+<!-- Garment info -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div>
+<label class="block text-xs font-bold text-brand-dark mb-1">نوع القطعة *</label>
+<select class="w-full bg-brand-creamLight text-xs p-2.5 rounded-xl border border-brand-beige focus:ring-1 focus:ring-brand-gold outline-none" id="newItemType">
+<option>فستان سهرة كوتور</option>
+<option>فستان زفاف ملكي</option>
+<option>جلابية استقبال فاخرة</option>
+<option>عباية مناسبات بتطريز يدوي</option>
+<option>طقم بدلة رسمية نسائية</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-bold text-brand-dark mb-1">نوع ولون القماش الأساسي</label>
+<input class="w-full bg-brand-creamLight text-xs p-2.5 rounded-xl border border-brand-beige focus:ring-1 focus:ring-brand-gold outline-none" id="newFabric" placeholder="مثال: ميكادو فرنسي لؤلؤي" type="text"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-brand-dark mb-1">الخياطة المسؤولة</label>
+<select class="w-full bg-brand-creamLight text-xs p-2.5 rounded-xl border border-brand-beige focus:ring-1 focus:ring-brand-gold outline-none" id="newTailor">
+<option>م. إلينا (كبير الخياطات)</option>
+<option>م. مريم (فساتين الزفاف)</option>
+<option>م. سناء (تطريز وكريستال)</option>
+<option>م. ريم (قص وباترون)</option>
+</select>
+</div>
+</div>
+<!-- Deadlines and financial -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<div>
+<label class="block text-xs font-bold text-brand-dark mb-1">موعد التسليم المحدد بالساعة *</label>
+<input class="w-full bg-brand-creamLight text-xs p-2.5 rounded-xl border border-brand-beige focus:ring-1 focus:ring-brand-gold outline-none" id="newDeliveryDate" required="" type="datetime-local"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-brand-dark mb-1">السعر الإجمالي (ر.س) *</label>
+<input class="w-full bg-brand-creamLight text-xs p-2.5 rounded-xl border border-brand-beige focus:ring-1 focus:ring-brand-gold outline-none" id="newPrice" placeholder="3500" required="" type="number"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-brand-dark mb-1">العربون المدفوع (ر.س) *</label>
+<input class="w-full bg-brand-creamLight text-xs p-2.5 rounded-xl border border-brand-beige focus:ring-1 focus:ring-brand-gold outline-none" id="newDeposit" placeholder="1500" required="" type="number"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-brand-dark mb-1">أولوية الطلب</label>
+<select class="w-full bg-brand-creamLight text-xs p-2.5 rounded-xl border border-brand-beige focus:ring-1 focus:ring-brand-gold outline-none" id="newPriority">
+<option value="normal">عادي</option>
+<option value="urgent">مستعجل (VIP)</option>
+</select>
+</div>
+</div>
+<!-- Quick Measurements Inputs -->
+<div class="p-4 rounded-2xl bg-brand-creamLight border border-brand-beige/50">
+<h4 class="text-xs font-bold text-brand-dark mb-3 flex items-center gap-1.5">
+<i class="w-4 h-4 text-brand-gold" data-lucide="ruler"></i>
+            المقاسات المبدئية (سم)
+          </h4>
+<div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+<div>
+<span class="text-[10px] text-brand-dark/60 block">الطول</span>
+<input class="w-full bg-white text-xs p-1.5 rounded-lg border border-brand-beige text-center" placeholder="150" type="text"/>
+</div>
+<div>
+<span class="text-[10px] text-brand-dark/60 block">الصدر</span>
+<input class="w-full bg-white text-xs p-1.5 rounded-lg border border-brand-beige text-center" placeholder="92" type="text"/>
+</div>
+<div>
+<span class="text-[10px] text-brand-dark/60 block">الخصر</span>
+<input class="w-full bg-white text-xs p-1.5 rounded-lg border border-brand-beige text-center" placeholder="70" type="text"/>
+</div>
+<div>
+<span class="text-[10px] text-brand-dark/60 block">الأرداف</span>
+<input class="w-full bg-white text-xs p-1.5 rounded-lg border border-brand-beige text-center" placeholder="100" type="text"/>
+</div>
+<div>
+<span class="text-[10px] text-brand-dark/60 block">الكتف</span>
+<input class="w-full bg-white text-xs p-1.5 rounded-lg border border-brand-beige text-center" placeholder="38" type="text"/>
+</div>
+<div>
+<span class="text-[10px] text-brand-dark/60 block">الكم</span>
+<input class="w-full bg-white text-xs p-1.5 rounded-lg border border-brand-beige text-center" placeholder="58" type="text"/>
+</div>
+</div>
+</div>
+<!-- Submit Button -->
+<div class="flex items-center justify-end gap-3 pt-4 border-t border-brand-beige/60">
+<button class="text-xs px-5 py-2.5 rounded-xl border border-brand-beige text-brand-dark hover:bg-brand-cream" onclick="closeModal('newOrderModal')" type="button">
+            إلغاء
+          </button>
+<button class="gold-gradient-btn text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-md flex items-center gap-1.5" type="submit">
+<i class="w-4 h-4" data-lucide="check"></i>
+            تأكيد وإنشاء الطلب
+          </button>
+</div>
+</form>
+</div>
+</div>
+<!-- ==================== TOAST NOTIFICATION CONTAINER ==================== -->
+<div class="fixed bottom-6 left-6 z-50 flex flex-col gap-2 pointer-events-none" id="toastContainer"></div>
+<!-- ==================== HIDDEN PRINT CONTAINER ==================== -->
+<div class="hidden p-8 text-black bg-white" id="print-area">
+<div class="text-center pb-6 border-b border-gray-300">
+<h1 class="text-3xl font-bold font-amiri">أتيليه نَسِيج للخياطة الراقية</h1>
+<p class="text-sm text-gray-600">سند استلام وبطاقة طلب تفصيل</p>
+</div>
+<div class="py-6 space-y-4" id="print-content">
+<!-- Populated at print time -->
+</div>
+</div>
+<!-- ==================== FOOTER ==================== -->
+<footer class="bg-white/80 border-t border-brand-beige/50 py-6 text-center text-xs text-brand-dark/60 mt-12">
+<div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between px-6 gap-2">
+<div class="flex items-center gap-2">
+<span class="font-bold text-brand-dark">مشغل نسيج للخياطة الراقية</span>
+<span>- نظام إدارة الورش والعميلات الذكي v2.4</span>
+</div>
+<p class="text-[11px] text-brand-dark/50">تصميم وتطوير هندسي فاخر • متوافق مع كافة الأجهزة وشاشات الهواتف والأجهزة اللوحية</p>
+</div>
+</footer>
+<!-- ============================================================== -->
+<!-- JAVASCRIPT APPLICATION LOGIC & STATE ENGINE                     -->
+<!-- ============================================================== -->
+<script>
+    // --- 1. MOCK DATA STORE ---
+    const initialOrders = [
+      {
+        id: 'NSJ-2024-884',
+        clientName: 'سارة بنت فهد آل سعود',
+        clientPhone: '0555123456',
+        itemType: 'فستان سهرة ملكي كوتور',
+        fabric: 'حرير ميكادو إيطالي كحلي',
+        deliveryDate: '2024-10-28T19:00:00',
+        tailor: 'م. إلينا (كبير الخياطات)',
+        status: 'in_progress', // 'new', 'cutting', 'in_progress', 'finishing', 'ready', 'delivered'
+        totalPrice: 3850,
+        deposit: 2000,
+        priority: 'urgent',
+        image: 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=800&q=80',
+        measurements: { length: 152, bust: 94, waist: 72, hips: 102, shoulder: 39, sleeve: 59 },
+        notes: 'حياكة تطريز خرز يدوي على الأكتاف، ذيل 35 سم.'
+      },
+      {
+        id: 'NSJ-2024-885',
+        clientName: 'أميرة المهيدب',
+        clientPhone: '0504987654',
+        itemType: 'فستان زفاف كوتور ملكي',
+        fabric: 'تول فرنسي مطرز باللؤلؤ',
+        deliveryDate: '2024-11-05T20:00:00',
+        tailor: 'م. مريم (فساتين الزفاف)',
+        status: 'cutting',
+        totalPrice: 12500,
+        deposit: 7000,
+        priority: 'urgent',
+        image: 'https://images.unsplash.com/photo-1594552072238-b8a33785b261?auto=format&fit=crop&w=800&q=80',
+        measurements: { length: 158, bust: 88, waist: 66, hips: 96, shoulder: 37, sleeve: 61 },
+        notes: 'كورسيه مقوى داخلي، بروفة أولى بعد أسبوع.'
+      },
+      {
+        id: 'NSJ-2024-886',
+        clientName: 'لطيفة بنت راشد',
+        clientPhone: '0567112233',
+        itemType: 'جلابية استقبال فاخرة',
+        fabric: 'حرير كريب ياباني زمردي',
+        deliveryDate: '2024-10-25T17:00:00',
+        tailor: 'م. سناء (تطريز وكريستال)',
+        status: 'ready',
+        totalPrice: 2200,
+        deposit: 2200,
+        priority: 'normal',
+        image: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=800&q=80',
+        measurements: { length: 148, bust: 98, waist: 82, hips: 108, shoulder: 41, sleeve: 56 },
+        notes: 'تم الكي بالبخار وجاهز للاستلام الفوري.'
+      },
+      {
+        id: 'NSJ-2024-887',
+        clientName: 'ريم القحطاني',
+        clientPhone: '0543322110',
+        itemType: 'بدلة كوتور رسمية نسائية',
+        fabric: 'صوف كشميري بيج دافئ',
+        deliveryDate: '2024-11-02T16:00:00',
+        tailor: 'م. ريم (قص وباترون)',
+        status: 'new',
+        totalPrice: 3100,
+        deposit: 1500,
+        priority: 'normal',
+        image: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=800&q=80',
+        measurements: { length: 142, bust: 90, waist: 74, hips: 98, shoulder: 40, sleeve: 58 },
+        notes: 'بطانة حريرية كاملة مع أزرار ذهبية عتيقة.'
+      }
+    ];
+
+    const initialInventory = [
+      { id: 1, name: 'حرير ميكادو إيطالي', category: 'أقمشة فاخرة', stock: '24 متر', minLimit: '10 متر', status: 'optimal', color: '#1B263B' },
+      { id: 2, name: 'حرير شيفون بيج', category: 'أقمشة بطانات', stock: '4 متر', minLimit: '8 متر', status: 'low', color: '#D8C7B5' },
+      { id: 3, name: 'تول فرنسي ناعم', category: 'أقمشة كوتور', stock: '45 متر', minLimit: '15 متر', status: 'optimal', color: '#FCFAF6' },
+      { id: 4, name: 'سحاب سحري فرنسي 60سم', category: 'مستلزمات', stock: '3 حبات', minLimit: '10 حبات', status: 'low', color: '#B99A63' },
+      { id: 5, name: 'خرز كريستال سواروفسكي', category: 'تطريز يدوي', stock: '18 علبة', minLimit: '5 علب', status: 'optimal', color: '#E0AAFF' },
+      { id: 6, name: 'خيوط كوتور ألمانية متينة', category: 'خيوط وحياكة', stock: '32 بكرة', minLimit: '12 بكرة', status: 'optimal', color: '#3B2722' }
+    ];
+
+    const initialVault = [
+      {
+        name: 'سارة بنت فهد آل سعود',
+        phone: '0555123456',
+        lastUpdated: '12 أكتوبر 2024',
+        totalOrders: 6,
+        measurements: { length: 152, bust: 94, waist: 72, hips: 102, shoulder: 39, sleeve: 59 }
+      },
+      {
+        name: 'أميرة المهيدب',
+        phone: '0504987654',
+        lastUpdated: '18 أكتوبر 2024',
+        totalOrders: 3,
+        measurements: { length: 158, bust: 88, waist: 66, hips: 96, shoulder: 37, sleeve: 61 }
+      },
+      {
+        name: 'نوف التميمي',
+        phone: '0501199887',
+        lastUpdated: '01 سبتمبر 2024',
+        totalOrders: 9,
+        measurements: { length: 149, bust: 96, waist: 78, hips: 104, shoulder: 40, sleeve: 57 }
+      }
+    ];
+
+    const initialTailors = [
+      { name: 'م. إلينا', title: 'كبير خياطات الكوتور', activePieces: 5, completedThisMonth: 14, efficiency: '98%' },
+      { name: 'م. مريم', title: 'متخصصة فساتين الزفاف', activePieces: 3, completedThisMonth: 8, efficiency: '95%' },
+      { name: 'م. سناء', title: 'أخصائية الشك والتطريز اليدوي', activePieces: 6, completedThisMonth: 16, efficiency: '99%' },
+      { name: 'م. ريم', title: 'خبيرة الباترون والقص', activePieces: 5, completedThisMonth: 19, efficiency: '94%' }
+    ];
+
+    const initialAppointments = [
+      { time: '11:00 ص', client: 'سارة بنت فهد', type: 'بروفة أولية للقطعة', tailor: 'م. إلينا', status: 'قادم اليوم' },
+      { time: '02:30 م', client: 'منى الراجحي', type: 'أخذ مقاسات واستشارة تصميم', tailor: 'م. ريم', status: 'قادم اليوم' },
+      { time: '05:00 م', client: 'لطيفة بنت راشد', type: 'تسليم نهائي للقطعة', tailor: 'إدارة الصالة', status: 'جاهز للاستلام' },
+      { time: '07:30 م', client: 'أميرة المهيدب', type: 'معاينة تطريز فستان الزفاف', tailor: 'م. مريم', status: 'غداً' }
+    ];
+
+    // --- APPLICATION STATE ---
+    let state = {
+      orders: [...initialOrders],
+      currentView: 'dashboard', // 'dashboard' or 'tracker'
+      currentAdminSubTab: 'orders',
+      activeTrackingOrderId: 'NSJ-2024-884',
+      userRole: 'admin',
+      countdownInterval: null
+    };
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set default delivery date 5 days from now in new order form
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 5);
+      futureDate.setHours(18, 0, 0, 0);
+      const formattedDate = futureDate.toISOString().slice(0, 16);
+      const deliveryInput = document.getElementById('newDeliveryDate');
+      if (deliveryInput) deliveryInput.value = formattedDate;
+
+      // Render all views
+      renderOrdersTable();
+      renderStats();
+      renderInventory();
+      renderVault();
+      renderStaffAndCalendar();
+      updateTrackerView(state.activeTrackingOrderId);
+      startCountdownTimer();
+      
+      lucide.createIcons();
+    });
+
+    // --- VIEW SWITCHING ---
+    function switchView(viewName) {
+      state.currentView = viewName;
+      const clientTrackerView = document.getElementById('view-client-tracker');
+      const adminDashboardView = document.getElementById('view-admin-dashboard');
+      const navBtnAdmin = document.getElementById('nav-btn-admin');
+      const navBtnClient = document.getElementById('nav-btn-client');
+
+      if (viewName === 'tracker') {
+        clientTrackerView.classList.remove('hidden');
+        adminDashboardView.classList.add('hidden');
+        
+        navBtnClient.classList.add('bg-brand-dark', 'text-white', 'shadow-sm');
+        navBtnClient.classList.remove('text-brand-dark/70');
+        navBtnAdmin.classList.remove('bg-brand-dark', 'text-white', 'shadow-sm');
+        navBtnAdmin.classList.add('text-brand-dark/70');
+
+        updateTrackerView(state.activeTrackingOrderId);
+      } else {
+        clientTrackerView.classList.add('hidden');
+        adminDashboardView.classList.remove('hidden');
+
+        navBtnAdmin.classList.add('bg-brand-dark', 'text-white', 'shadow-sm');
+        navBtnAdmin.classList.remove('text-brand-dark/70');
+        navBtnClient.classList.remove('bg-brand-dark', 'text-white', 'shadow-sm');
+        navBtnClient.classList.add('text-brand-dark/70');
+
+        renderStats();
+        renderOrdersTable();
+      }
+      lucide.createIcons();
+    }
+
+    // --- ADMIN SUB-TAB SWITCHING ---
+    function switchAdminSubTab(tabName) {
+      state.currentAdminSubTab = tabName;
+      const tabs = ['orders', 'vault', 'inventory', 'staff'];
+      
+      tabs.forEach(t => {
+        const el = document.getElementById(`subtab-${t}`);
+        const btn = document.getElementById(`adminTab${capitalize(t)}`);
+        if (t === tabName) {
+          el.classList.remove('hidden');
+          btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-brand-dark text-white shadow-sm flex items-center gap-2";
+        } else {
+          el.classList.add('hidden');
+          btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-white text-brand-dark hover:bg-brand-cream border border-brand-beige/60 flex items-center gap-2";
+        }
+      });
+      lucide.createIcons();
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    // --- ROLE HANDLING ---
+    function changeRole(role) {
+      state.userRole = role;
+      const roleNames = {
+        admin: 'المديرة العامة (كامل الصلاحيات والإشراف المالي)',
+        manager: 'مشرفة الورشة (إدارة الإنتاج وتوزيع الطلبات)',
+        tailor: 'كبار الخياطات (تحديث حالات التنفيذ والتفصيل)'
+      };
+      toast(`تم التبديل إلى صلاحية: ${roleNames[role]}`);
+    }
+
+    // --- ORDERS TABLE RENDERING ---
+    function renderOrdersTable() {
+      const search = (document.getElementById('ordersTableSearch')?.value || '').toLowerCase();
+      const statusFilter = document.getElementById('ordersStatusFilter')?.value || 'all';
+      const tbody = document.getElementById('ordersTableBody');
+      if (!tbody) return;
+
+      const filtered = state.orders.filter(order => {
+        const matchSearch = order.id.toLowerCase().includes(search) || 
+                            order.clientName.toLowerCase().includes(search) || 
+                            order.clientPhone.includes(search);
+        const matchStatus = (statusFilter === 'all') ? true : order.status === statusFilter;
+        return matchSearch && matchStatus;
+      });
+
+      tbody.innerHTML = filtered.map(order => {
+        const statusConfig = getStatusBadge(order.status);
+        const remaining = order.totalPrice - order.deposit;
+
+        return `
+          <tr class="hover:bg-brand-creamLight/60 transition-colors">
+            <td class="py-3 px-4 font-mono font-bold text-brand-dark">
+              <span class="cursor-pointer hover:text-brand-gold flex items-center gap-1" onclick="openOrderDetails('${order.id}')">
+                ${order.id}
+                ${order.priority === 'urgent' ? '<span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>' : ''}
+              </span>
+            </td>
+            <td class="py-3 px-4">
+              <div class="font-bold text-brand-dark">${order.clientName}</div>
+              <div class="text-[10px] text-brand-dark/50 font-mono">${order.clientPhone}</div>
+            </td>
+            <td class="py-3 px-4">
+              <div class="font-medium text-brand-dark">${order.itemType}</div>
+              <div class="text-[10px] text-brand-dark/60">${order.fabric}</div>
+            </td>
+            <td class="py-3 px-4 font-mono text-[11px]">
+              <div>${formatDateTime(order.deliveryDate)}</div>
+            </td>
+            <td class="py-3 px-4 text-brand-dark/80 font-medium">
+              ${order.tailor}
+            </td>
+            <td class="py-3 px-4">
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1.5 ${statusConfig.class}">
+                ${statusConfig.icon}
+                ${statusConfig.label}
+              </span>
+            </td>
+            <td class="py-3 px-4">
+              <div class="font-mono font-bold">${order.totalPrice.toLocaleString()} ر.س</div>
+              <div class="text-[10px] ${remaining === 0 ? 'text-brand-success' : 'text-amber-700 font-semibold'}">
+                ${remaining === 0 ? 'مسدد بالكامل ✓' : `متبقي: ${remaining.toLocaleString()} ر.س`}
+              </div>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <div class="flex items-center justify-center gap-1.5">
+                <button onclick="openOrderDetails('${order.id}')" title="عرض وتعديل الحالة" class="p-1.5 rounded-lg bg-white border border-brand-beige hover:border-brand-gold text-brand-dark transition-all">
+                  <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="trackThisOrder('${order.id}')" title="فتح في بوابة التتبع للعميلة" class="p-1.5 rounded-lg bg-brand-goldSoft border border-brand-gold/40 text-brand-gold hover:bg-brand-gold hover:text-white transition-all">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // --- STATUS HELPERS ---
+    function getStatusBadge(status) {
+      switch (status) {
+        case 'new':
+          return { label: 'تم أخذ المقاسات', class: 'bg-slate-100 text-slate-800 border border-slate-300', icon: '📏' };
+        case 'cutting':
+          return { label: 'تم القص والباترون', class: 'bg-blue-100 text-blue-900 border border-blue-300', icon: '✂️' };
+        case 'in_progress':
+          return { label: 'قيد الخياطة والاهتمام', class: 'bg-amber-100 text-amber-900 border border-amber-300', icon: '🧵' };
+        case 'finishing':
+          return { label: 'التشطيب والبروفة', class: 'bg-purple-100 text-purple-900 border border-purple-300', icon: '✨' };
+        case 'ready':
+          return { label: 'جاهز للاستلام 👑', class: 'bg-emerald-100 text-emerald-900 border border-emerald-300', icon: '🎁' };
+        case 'delivered':
+          return { label: 'تم التسليم بنجاح', class: 'bg-gray-100 text-gray-700 border border-gray-300', icon: '✓' };
+        default:
+          return { label: 'قيد المتابعة', class: 'bg-gray-100 text-gray-800', icon: '•' };
+      }
+    }
+
+    function formatDateTime(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      const options = { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' };
+      return date.toLocaleDateString('ar-SA', options);
+    }
+
+    // --- REAL-TIME SMART COUNTDOWN TIMER ---
+    function startCountdownTimer() {
+      if (state.countdownInterval) clearInterval(state.countdownInterval);
+
+      state.countdownInterval = setInterval(() => {
+        const order = state.orders.find(o => o.id === state.activeTrackingOrderId) || state.orders[0];
+        if (!order) return;
+
+        const targetTime = new Date(order.deliveryDate).getTime();
+        const now = new Date().getTime();
+        const difference = targetTime - now;
+
+        const daysEl = document.getElementById('timerDays');
+        const hoursEl = document.getElementById('timerHours');
+        const minutesEl = document.getElementById('timerMinutes');
+        const secondsEl = document.getElementById('timerSeconds');
+
+        if (!daysEl || !hoursEl || !minutesEl || !secondsEl) return;
+
+        if (difference <= 0 || order.status === 'ready' || order.status === 'delivered') {
+          daysEl.innerText = '00';
+          hoursEl.innerText = '00';
+          minutesEl.innerText = '00';
+          secondsEl.innerText = '00';
+          return;
+        }
+
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        daysEl.innerText = String(days).padStart(2, '0');
+        hoursEl.innerText = String(hours).padStart(2, '0');
+        minutesEl.innerText = String(minutes).padStart(2, '0');
+        secondsEl.innerText = String(seconds).padStart(2, '0');
+      }, 1000);
+    }
+
+    // --- CLIENT TRACKER VIEW UPDATER ---
+    function updateTrackerView(orderId) {
+      const order = state.orders.find(o => o.id === orderId) || state.orders[0];
+      if (!order) return;
+
+      state.activeTrackingOrderId = order.id;
+
+      // Update text fields
+      document.getElementById('trackerOrderIdDisplay').innerText = order.id;
+      document.getElementById('trackerClientNameTitle').innerText = `عزيزتنا: ${order.clientName} ✨`;
+      document.getElementById('trackerItemType').innerText = order.itemType;
+      document.getElementById('trackerDeliveryDateDisplay').innerText = formatDateTime(order.deliveryDate);
+      document.getElementById('trackerTailorDisplay').innerText = order.tailor;
+
+      // Dynamic Motivation Banner Logic
+      const quoteEl = document.getElementById('trackerDynamicQuote');
+      const badgeEl = document.getElementById('trackerOrderStatusBadge');
+      const progressLine = document.getElementById('trackerProgressLine');
+
+      const statusMap = {
+        new: {
+          badge: 'تم أخذ وتوثيق المقاسات بنجاح',
+          quote: '"بدأنا رحلة الجمال! فريقنا يدرس تفاصيل الباترون ليطابق قوامكِ بأقصى درجات الأناقة والراحة."',
+          progress: '15%'
+        },
+        cutting: {
+          badge: 'تم قص القماش وإعداد الباترون',
+          quote: '"أقمشتكِ الفاخرة بين أيدي كبار مقصصي الكوتور، نعتني بكل خيط وثنية بكل حب وشغف."',
+          progress: '38%'
+        },
+        in_progress: {
+          badge: 'قطعتكِ قيد الخياطة والاهتمام بالتفاصيل ✨',
+          quote: '"فريقنا من أمهر مصممي الخياطة الراقية يقوم الآن بحياكة الدانتيل والتطريز اليدوي بعناية فائقة لتكوني أيقونة الحفل."',
+          progress: '62%'
+        },
+        finishing: {
+          badge: 'مرحلة التشطيب الأخير والفحص بالبخار',
+          quote: '"اللمسات الملكية الأخيرة جارية! الفحص الدقيق والكي البخاري الإيطالي لتسليمكِ تحفة خالية من أي هفوة."',
+          progress: '85%'
+        },
+        ready: {
+          badge: 'تحفتكِ الفنية جاهزة للاستلام الآن 👑',
+          quote: '"اكتملت إطلالتكِ الساحرة! فستانكِ معلق في جناح الاستقبال الخاص ينتظر قدومكِ لتبهري الجميع."',
+          progress: '100%'
+        },
+        delivered: {
+          badge: 'تم التسليم بنجاح - شكراً لثقتكِ الغالية',
+          quote: '"سعدنا جداً بخدمتكِ ونتمنى لكِ مناسبة عامرة بالفرح والسعادة والتألق الدائم."',
+          progress: '100%'
+        }
+      };
+
+      const currentStatusInfo = statusMap[order.status] || statusMap.in_progress;
+      quoteEl.innerText = currentStatusInfo.quote;
+      badgeEl.innerText = currentStatusInfo.badge;
+      if (progressLine) progressLine.style.width = currentStatusInfo.progress;
+
+      // Celebrate confetti if ready!
+      if (order.status === 'ready' && typeof confetti === 'function') {
+        confetti({
+          particleCount: 60,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#B99A63', '#D8C7B5', '#3B2722']
+        });
+      }
+    }
+
+    // Search from client bar
+    function handleClientSearch() {
+      const query = document.getElementById('clientSearchInput').value.trim();
+      if (!query) {
+        toast('الرجاء إدخال رقم الطلب أو الجوال للبحث');
+        return;
+      }
+
+      const match = state.orders.find(o => o.id.toLowerCase() === query.toLowerCase() || o.clientPhone === query);
+      if (match) {
+        updateTrackerView(match.id);
+        toast(`تم جلب تفاصيل الطلب: ${match.id} للعميلة ${match.clientName}`);
+      } else {
+        toast(`لم يتم العثور على طلب مطابق لرقم "${query}". يرجى التأكد.`);
+      }
+    }
+
+    function trackThisOrder(orderId) {
+      switchView('tracker');
+      updateTrackerView(orderId);
+    }
+
+    // --- ORDER DETAILS MODAL ---
+    function openOrderDetails(orderId) {
+      const order = state.orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      state.activeTrackingOrderId = order.id;
+
+      document.getElementById('modalOrderBadge').innerText = order.id;
+      document.getElementById('modalOrderTitle').innerText = `${order.itemType} - ${order.clientName}`;
+
+      const content = document.getElementById('modalOrderContent');
+      const remaining = order.totalPrice - order.deposit;
+
+      content.innerHTML = `
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div class="p-3 bg-brand-cream rounded-xl">
+            <span class="text-brand-dark/50 block text-[10px]">الجوال:</span>
+            <span class="font-bold text-brand-dark font-mono">${order.clientPhone}</span>
+          </div>
+          <div class="p-3 bg-brand-cream rounded-xl">
+            <span class="text-brand-dark/50 block text-[10px]">موعد التسليم:</span>
+            <span class="font-bold text-brand-dark">${formatDateTime(order.deliveryDate)}</span>
+          </div>
+          <div class="p-3 bg-brand-cream rounded-xl">
+            <span class="text-brand-dark/50 block text-[10px]">الإجمالي المالي:</span>
+            <span class="font-bold text-brand-dark font-mono">${order.totalPrice.toLocaleString()} ر.س</span>
+          </div>
+          <div class="p-3 bg-brand-cream rounded-xl">
+            <span class="text-brand-dark/50 block text-[10px]">المتبقي:</span>
+            <span class="font-bold text-brand-gold font-mono">${remaining.toLocaleString()} ر.س</span>
+          </div>
+        </div>
+
+        <div class="p-4 bg-brand-creamLight rounded-2xl border border-brand-beige/50 text-xs">
+          <h4 class="font-bold text-brand-dark mb-2">المقاسات المسجلة للقطعة (سم):</h4>
+          <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center">
+            <div class="bg-white p-2 rounded-lg border border-brand-beige/40">
+              <span class="text-[10px] text-brand-dark/60 block">الطول</span>
+              <span class="font-bold">${order.measurements?.length || 150}</span>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-brand-beige/40">
+              <span class="text-[10px] text-brand-dark/60 block">الصدر</span>
+              <span class="font-bold">${order.measurements?.bust || 92}</span>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-brand-beige/40">
+              <span class="text-[10px] text-brand-dark/60 block">الخصر</span>
+              <span class="font-bold">${order.measurements?.waist || 70}</span>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-brand-beige/40">
+              <span class="text-[10px] text-brand-dark/60 block">الأرداف</span>
+              <span class="font-bold">${order.measurements?.hips || 100}</span>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-brand-beige/40">
+              <span class="text-[10px] text-brand-dark/60 block">الكتف</span>
+              <span class="font-bold">${order.measurements?.shoulder || 38}</span>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-brand-beige/40">
+              <span class="text-[10px] text-brand-dark/60 block">الكم</span>
+              <span class="font-bold">${order.measurements?.sleeve || 58}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-xs text-brand-dark/80 bg-brand-goldSoft/50 p-3 rounded-xl border border-brand-gold/30">
+          <strong>ملاحظات التنفيذ والخياطة:</strong> ${order.notes || 'لا توجد ملاحظات إضافية.'}
+        </div>
+      `;
+
+      openModal('orderDetailsModal');
+    }
+
+    // --- DYNAMIC STATUS UPDATE (REFLECTS LIVE IN CLIENT TRACKER) ---
+    function updateOrderStatus(newStatus) {
+      const order = state.orders.find(o => o.id === state.activeTrackingOrderId);
+      if (!order) return;
+
+      order.status = newStatus;
+      renderOrdersTable();
+      renderStats();
+      updateTrackerView(order.id);
+
+      const statusLabels = {
+        new: 'تم أخذ المقاسات',
+        cutting: 'تم القص والباترون',
+        in_progress: 'قيد الخياطة والاهتمام',
+        finishing: 'التشطيب والكي',
+        ready: 'جاهز للتسليم في الصالة 👑'
+      };
+
+      toast(`تم تحديث حالة الطلب ${order.id} إلى: "${statusLabels[newStatus]}" وانعكست في بوابة العميل.`);
+      closeModal('orderDetailsModal');
+    }
+
+    // --- CREATE NEW ORDER ---
+    function handleCreateOrder(e) {
+      e.preventDefault();
+      
+      const newId = `NSJ-2024-${888 + state.orders.length}`;
+      const name = document.getElementById('newClientName').value;
+      const phone = document.getElementById('newClientPhone').value;
+      const itemType = document.getElementById('newItemType').value;
+      const fabric = document.getElementById('newFabric').value || 'حرير كوتور إيطالي';
+      const tailor = document.getElementById('newTailor').value;
+      const deliveryDate = document.getElementById('newDeliveryDate').value;
+      const price = parseFloat(document.getElementById('newPrice').value) || 0;
+      const deposit = parseFloat(document.getElementById('newDeposit').value) || 0;
+      const priority = document.getElementById('newPriority').value;
+
+      const newOrder = {
+        id: newId,
+        clientName: name,
+        clientPhone: phone,
+        itemType: itemType,
+        fabric: fabric,
+        deliveryDate: deliveryDate || new Date().toISOString(),
+        tailor: tailor,
+        status: 'new',
+        totalPrice: price,
+        deposit: deposit,
+        priority: priority,
+        image: 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=800&q=80',
+        measurements: { length: 150, bust: 92, waist: 70, hips: 100, shoulder: 38, sleeve: 58 },
+        notes: 'طلب جديد تم تسجيله في المشغل.'
+      };
+
+      state.orders.unshift(newOrder);
+      renderOrdersTable();
+      renderStats();
+      closeModal('newOrderModal');
+
+      // reset form
+      document.getElementById('newOrderForm').reset();
+
+      toast(`تم إنشاء طلب التفصيل ${newId} بنجاح للعميلة ${name}!`);
+    }
+
+    // --- STATS CALCULATION ---
+    function renderStats() {
+      const total = state.orders.length;
+      const inProgress = state.orders.filter(o => o.status === 'in_progress' || o.status === 'cutting').length;
+      const ready = state.orders.filter(o => o.status === 'ready').length;
+      const urgent = state.orders.filter(o => o.priority === 'urgent' && o.status !== 'delivered').length;
+
+      const totalSales = state.orders.reduce((acc, curr) => acc + curr.totalPrice, 0);
+      const pendingPayments = state.orders.reduce((acc, curr) => acc + (curr.totalPrice - curr.deposit), 0);
+
+      document.getElementById('statTotalOrders').innerText = total;
+      document.getElementById('statInProgress').innerText = inProgress;
+      document.getElementById('statReady').innerText = ready;
+      document.getElementById('statUrgent').innerText = urgent;
+      document.getElementById('statSales').innerText = totalSales.toLocaleString();
+      document.getElementById('statPendingPayments').innerText = pendingPayments.toLocaleString();
+    }
+
+    function filterOrdersByStatus(status) {
+      const select = document.getElementById('ordersStatusFilter');
+      if (select) {
+        if (status === 'urgent') {
+          // Special filter for urgent
+          select.value = 'all';
+          const search = document.getElementById('ordersTableSearch');
+          if (search) search.value = '';
+        } else {
+          select.value = status;
+        }
+        renderOrdersTable();
+      }
+      switchAdminSubTab('orders');
+    }
+
+    // --- INVENTORY RENDERING ---
+    function renderInventory() {
+      const container = document.getElementById('inventoryGrid');
+      if (!container) return;
+
+      container.innerHTML = initialInventory.map(item => `
+        <div class="glass-card p-4 rounded-2xl shadow-luxury border ${item.status === 'low' ? 'border-amber-400 bg-amber-50/20' : 'border-brand-beige/50'} flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] text-brand-dark/50">${item.category}</span>
+              ${item.status === 'low' ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold">⚠️ مخزون منخفض</span>' : '<span class="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-medium">متوفر</span>'}
+            </div>
+            <h4 class="font-bold text-sm text-brand-dark flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full border border-gray-300" style="background-color: ${item.color}"></span>
+              ${item.name}
+            </h4>
+            <div class="mt-3 flex items-baseline justify-between">
+              <span class="text-xs text-brand-dark/60">الكمية المتوفرة:</span>
+              <span class="font-bold font-mono text-base text-brand-dark">${item.stock}</span>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-brand-beige/40 flex items-center justify-between text-[11px]">
+            <span class="text-brand-dark/50">الحد الأدنى: ${item.minLimit}</span>
+            <button onclick="toast('تم تحديث جرد ${item.name}')" class="text-brand-gold font-bold hover:underline">تعديل الجرد</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // --- VAULT RENDERING ---
+    function renderVault() {
+      const container = document.getElementById('measurementsVaultCards');
+      if (!container) return;
+
+      container.innerHTML = initialVault.map(client => `
+        <div class="glass-card p-5 rounded-2xl shadow-luxury space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="font-bold text-brand-dark font-amiri text-base">${client.name}</h4>
+              <p class="text-[11px] text-brand-dark/50 font-mono">${client.phone}</p>
+            </div>
+            <div class="w-9 h-9 rounded-full bg-brand-goldSoft text-brand-gold font-bold flex items-center justify-center text-xs">
+              ${client.totalOrders} ط
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 text-xs bg-brand-creamLight p-3 rounded-xl border border-brand-beige/40">
+            <div><span class="text-[10px] text-brand-dark/50 block">الطول:</span><span class="font-bold">${client.measurements.length}</span></div>
+            <div><span class="text-[10px] text-brand-dark/50 block">الصدر:</span><span class="font-bold">${client.measurements.bust}</span></div>
+            <div><span class="text-[10px] text-brand-dark/50 block">الخصر:</span><span class="font-bold">${client.measurements.waist}</span></div>
+            <div><span class="text-[10px] text-brand-dark/50 block">الأرداف:</span><span class="font-bold">${client.measurements.hips}</span></div>
+            <div><span class="text-[10px] text-brand-dark/50 block">الكتف:</span><span class="font-bold">${client.measurements.shoulder}</span></div>
+            <div><span class="text-[10px] text-brand-dark/50 block">الكم:</span><span class="font-bold">${client.measurements.sleeve}</span></div>
+          </div>
+
+          <div class="flex items-center justify-between text-[11px] pt-1 border-t border-brand-beige/30">
+            <span class="text-brand-dark/50">آخر تعديل: ${client.lastUpdated}</span>
+            <button onclick="toast('تم فتح سجل مقاسات ${client.name}')" class="text-brand-gold font-bold hover:underline">عرض التاريخ</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // --- STAFF & CALENDAR RENDERING ---
+    function renderStaffAndCalendar() {
+      const tailorsEl = document.getElementById('tailorsList');
+      const apptsEl = document.getElementById('appointmentsList');
+
+      if (tailorsEl) {
+        tailorsEl.innerHTML = initialTailors.map(tailor => `
+          <div class="p-3.5 rounded-xl bg-brand-creamLight border border-brand-beige/40 flex items-center justify-between">
+            <div>
+              <h5 class="text-xs font-bold text-brand-dark">${tailor.name}</h5>
+              <p class="text-[10px] text-brand-dark/60">${tailor.title}</p>
+            </div>
+            <div class="text-left font-mono">
+              <span class="text-xs font-bold text-brand-gold">${tailor.activePieces} قطع نشطة</span>
+              <span class="block text-[10px] text-brand-success font-medium">إنجاز ${tailor.efficiency}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      if (apptsEl) {
+        apptsEl.innerHTML = initialAppointments.map(appt => `
+          <div class="p-3.5 rounded-xl bg-white border border-brand-beige/50 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-3">
+              <span class="px-2.5 py-1 rounded-lg bg-brand-goldSoft text-brand-gold font-bold font-mono text-[11px]">
+                ${appt.time}
+              </span>
+              <div>
+                <h5 class="font-bold text-brand-dark">${appt.client}</h5>
+                <p class="text-[11px] text-brand-dark/60">${appt.type} (مع ${appt.tailor})</p>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold ${appt.status.includes('اليوم') ? 'bg-amber-100 text-amber-900' : 'bg-gray-100 text-gray-700'}">
+              ${appt.status}
+            </span>
+          </div>
+        `).join('');
+      }
+    }
+
+    // --- PRINT / EXPORT FUNCTIONS ---
+    function printOrderSummary() {
+      const order = state.orders.find(o => o.id === state.activeTrackingOrderId) || state.orders[0];
+      const printContent = document.getElementById('print-content');
+      
+      printContent.innerHTML = `
+        <div style="font-family: 'Cairo', sans-serif; direction: rtl; text-align: right; line-height: 1.8;">
+          <h2 style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">سند وبطاقة طلب تفصيل: ${order.id}</h2>
+          <p><strong>اسم العميلة الكريمة:</strong> ${order.clientName}</p>
+          <p><strong>رقم الجوال:</strong> ${order.clientPhone}</p>
+          <p><strong>نوع القطعة:</strong> ${order.itemType}</p>
+          <p><strong>نوع القماش:</strong> ${order.fabric}</p>
+          <p><strong>موعد التسليم المقرر:</strong> ${formatDateTime(order.deliveryDate)}</p>
+          <p><strong>المسؤولة عن الخياطة:</strong> ${order.tailor}</p>
+          <hr style="margin: 15px 0; border: 0; border-top: 1px solid #ccc;">
+          <h3 style="font-weight: bold;">البيان المالي:</h3>
+          <p>إجمالي السعر: ${order.totalPrice.toLocaleString()} ر.س</p>
+          <p>العربون المدفوع: ${order.deposit.toLocaleString()} ر.س</p>
+          <p>المتبقي عند الاستلام: ${(order.totalPrice - order.deposit).toLocaleString()} ر.س</p>
+          <hr style="margin: 15px 0; border: 0; border-top: 1px solid #ccc;">
+          <p style="font-size: 12px; color: #666;">نسيج كوتور - الرياض، المملكة العربية السعودية | شكراً لثقتكم باختيارنا</p>
+        </div>
+      `;
+
+      window.print();
+    }
+
+    function exportOrdersCSV() {
+      const headers = ['رقم الطلب', 'اسم العميلة', 'الجوال', 'نوع القطعة', 'القماش', 'الموعد', 'الحالة', 'السعر', 'المدفوع'];
+      const rows = state.orders.map(o => [
+        o.id,
+        o.clientName,
+        o.clientPhone,
+        o.itemType,
+        o.fabric,
+        o.deliveryDate,
+        o.status,
+        o.totalPrice,
+        o.deposit
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + 
+        [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `طلبات_مشغل_نسيج_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast('تم تحميل ملف بيانات الطلبات بنجاح');
+    }
+
+    // --- MODAL UTILITIES ---
+    function openModal(id) {
+      document.getElementById(id)?.classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id)?.classList.add('hidden');
+    }
+
+    // --- TOAST SYSTEM ---
+    function toast(message) {
+      const container = document.getElementById('toastContainer');
+      const toastEl = document.createElement('div');
+      toastEl.className = 'bg-brand-dark text-white text-xs px-4 py-3 rounded-2xl shadow-luxury-lg border border-brand-gold/50 flex items-center gap-2 transform transition-all duration-300 translate-y-4 opacity-0 pointer-events-auto';
+      toastEl.innerHTML = `
+        <span class="w-2 h-2 rounded-full bg-brand-gold"></span>
+        <span>${message}</span>
+      `;
+
+      container.appendChild(toastEl);
+
+      // Animate in
+      setTimeout(() => {
+        toastEl.classList.remove('translate-y-4', 'opacity-0');
+      }, 10);
+
+      // Dismiss after 3.5s
+      setTimeout(() => {
+        toastEl.classList.add('translate-y-4', 'opacity-0');
+        setTimeout(() => toastEl.remove(), 300);
+      }, 3500);
+    }
+  </script>
+</body>
+</html>
